@@ -51,6 +51,27 @@ def checkCapacity(articles, bin_contents, bin_cap):
         print "function checkCapacity(), articles argument requires a dictionary"
         return 'dict_needed', 'dict_needed'
         
+def checkAllPoints(articles, bin_contents):
+    """ Check to be sure that all items are packed in one bin """
+    
+    err_mess = ""
+    err_mult= False
+    checkit = {}
+    for this_bin in bin_contents:
+        for this_art in this_bin:
+            checkit[this_art] = checkit.get(this_art,0) + 1
+            if checkit[this_art] > 1:
+                err_mult = True
+                err_mess += "Loc assigned mult times"
+                
+    err_all = False
+    for key_art in articles.keys():
+        if key_art not in checkit.keys():
+            err_all = True
+            err_mess += "Some locs not assigned to bins"
+            
+    return err_mult, err_all, err_mess
+
 def binpack(articles,bin_cap):
     """ You write your heuristic bin packing algorithm in this function using the argument values that are passed
              articles: a dictionary of the items to be loaded into the bins: the key is the article id and the value is the article volume
@@ -155,6 +176,14 @@ for problem_id in problems:
                 status = num_ok
             else:
                 print "P"+str(problem_id)+num_ok+"_"
+                
+        err_mult, err_all, err_mess = checkAllPoints(items, response)
+        if err_mult or err_all:
+            errors = True
+            if silent_mode:
+                status += "_" + err_mess
+            else:
+                print "P"+str(problem_id)+err_mess+"_"
     else:
         errors = True
         if silent_mode:
